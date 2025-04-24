@@ -3,7 +3,9 @@ const fileInputs = form.querySelectorAll('input[type="file"]');
 const firstOutputBox = document.querySelector(".result.first");
 const compareOutputBox = document.querySelector(".result.compare");
 const labels = document.querySelectorAll("label");
+const formError = form.querySelector(".form-error");
 
+// Display basic image file data
 function displayFileData(file, outputBox) {
   outputBox.querySelector(".file-name").textContent = file.name;
   outputBox.querySelector(".file-size").textContent = `${(
@@ -14,12 +16,14 @@ function displayFileData(file, outputBox) {
 }
 
 async function uploadFiles(files) {
+  formError.style.display = "none";
   const formData = new FormData();
 
   files.forEach((fileInput) => {
     formData.append(fileInput.getAttribute("name"), fileInput.files?.[0]);
   });
 
+  // Set loading icon
   firstOutputBox.querySelector(".upload-result").innerHTML = `
     <i class="ph ph-circle-notch"></i>
   `;
@@ -43,8 +47,8 @@ async function uploadFiles(files) {
 }
 
 function displayStatus(uploaded) {
-  console.log(uploaded);
-  if (uploaded) {
+  if (!uploaded.error) {
+    // Success upload result
     firstOutputBox.querySelector(".upload-result").innerHTML = `
           <span>Upload Successful</span>
           <i class="ph ph-check-circle"></i>
@@ -53,13 +57,20 @@ function displayStatus(uploaded) {
           <span>Upload Successful</span>
           <i class="ph ph-check-circle"></i>
         `;
-    document.querySelector(".images").style.display = "flex";
-    document.querySelector(".images .data").innerHTML = `
+    // Display images
+    // Display comparison data
+    const imagesDiv = document.querySelector(".images");
+    imagesDiv.style.display = "flex";
+    imagesDiv.querySelector(".file").src = "uploads/file.jpeg";
+    imagesDiv.querySelector(".compare").src = "uploads/compare.jpeg";
+    imagesDiv.querySelector(".diff").src = "uploads/diff.png";
+    imagesDiv.querySelector(".data").innerHTML = `
       <p>Number of different pixels: ${uploaded.mismatchedPixels}</p>
       <p>Match Percentage: ${uploaded.matchPercentage}</p>
       <p>Matches: ${uploaded.success}</p>
     `;
   } else {
+    // Failed upload result
     firstOutputBox.querySelector(".upload-result").innerHTML = `
           <span>Upload failed</span>
           <i class="ph ph-x-circle"></i>
@@ -68,18 +79,15 @@ function displayStatus(uploaded) {
           <span>Upload failed</span>
           <i class="ph ph-x-circle"></i>
         `;
+    formError.style.display = "block";
+    formError.textContent = `Error: ${uploaded.error}`;
   }
 }
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
-  console.log({ event });
-  fileInputs.forEach((fileInput) => {
-    const file = fileInput.files?.[0];
-    console.log({ fileInput, file });
-  });
   const uploaded = await uploadFiles(fileInputs);
-  displayStatus(JSON.parse(uploaded));
+  displayStatus(uploaded);
 });
 
 form.addEventListener("dragover", function (event) {
@@ -106,12 +114,8 @@ const getOutput = (forInput) => {
 fileInputs.forEach((fileInput) => {
   fileInput.addEventListener("change", function (e) {
     const file = fileInput.files?.[0];
-    console.log(e.target);
     const forInput = e.target.getAttribute("name");
-    console.log({ forInput });
-
     const output = getOutput(forInput);
-    console.log({ output });
 
     if (file) {
       displayFileData(file, output);
@@ -124,7 +128,7 @@ fileInputs.forEach((fileInput) => {
 // Loop through the nodelist of inputs to create event listeners
 labels.forEach((label) => {
   label.addEventListener("click", function (event) {
-    // Use closest incase of selecting "browse" or the icon
+    // Use closest to get the label, whose next sibling is the input
     const forInput = event.target.closest("label").nextElementSibling;
     forInput.click();
   });

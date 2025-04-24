@@ -28,7 +28,8 @@
           your files
         </span>
       </label>
-      <input type="file" name="file" accept=".png, .jpg, .jpeg" />
+      <input type="file" name="file" accept=".png, .jpg, .jpeg" required />
+      <p class="error">An image is required</p>
 
       <div class="result first">
         <i class="ph ph-file"></i>
@@ -51,7 +52,8 @@
           your files
         </span>
       </label>
-      <input type="file" name="compare" accept=".png, .jpg, .jpeg" />
+      <input type="file" name="compare" accept=".png, .jpg, .jpeg" required />
+      <p class="error">An image is required</p>
       <div class="result compare">
         <i class="ph ph-file"></i>
         <div class="file-details">
@@ -61,14 +63,15 @@
         <div class="upload-result"></div>
       </div>
       <button type="submit">Compare Images</button>
+      <p class="form-error"></p>
     </form>
     <div class="images">
       <h2>Image comparison</h2>
       <div class="data"></div>
       <div class="comparison">
-        <img src="uploads/file.jpeg" width="342" height="270" />
-        <img src="uploads/compare.jpeg" width="342" height="270" />
-        <img src="uploads/diff.png" width="342" height="270" />
+        <img class="file" src="" width="342" height="270" />
+        <img class="compare" src="" width="342" height="270" />
+        <img class="diff" src="" width="342" height="270" />
       </div>
     </div>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>

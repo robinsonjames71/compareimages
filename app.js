@@ -38,15 +38,16 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+// The compare route that takes the submitted form data
+// and compares the images with pixelmatch
 app.post(
   "/compare",
   upload.fields([{ name: "file" }, { name: "compare" }]),
   (req, res) => {
     const images = Object.values(req.files).map((file) => {
-      // The file input can be an array of files
+      // The file input can be an array of files but we are expecting only one
       let extArray = file[0].mimetype.split("/");
       let extension = extArray[extArray.length - 1];
-      console.log(file[0]);
       if (extension === "jpeg") {
         const jpegData = fs.readFileSync(file[0].path);
         return JPEG.decode(jpegData);
@@ -57,31 +58,35 @@ app.post(
     const { width, height } = images[0];
     const diff = new PNG({ width, height });
 
-    // pixelmatch returns the number of mismatched pixels
-    const mismatchedPixels = pixelmatch(
-      images[0].data,
-      images[1].data,
-      diff.data,
-      width,
-      height,
-      {
-        threshold: 0.1,
-      }
-    );
+    try {
+      // pixelmatch returns the number of mismatched pixels
+      const mismatchedPixels = pixelmatch(
+        images[0].data,
+        images[1].data,
+        diff.data,
+        width,
+        height,
+        {
+          threshold: 0.1,
+        }
+      );
 
-    const match = 1 - mismatchedPixels / (width * height);
-    const threshold = 0.8;
+      const match = 1 - mismatchedPixels / (width * height);
+      const threshold = 0.8;
 
-    fs.writeFileSync("./uploads/diff.png", PNG.sync.write(diff));
+      fs.writeFileSync("./uploads/diff.png", PNG.sync.write(diff));
 
-    res.status(200).json(
-      JSON.stringify({
+      // Return the matching data
+      res.status(200).json({
         mismatchedPixels,
         match,
         matchPercentage: `${(match * 100).toFixed(2)}%`,
         success: match >= threshold,
-      })
-    );
+      });
+    } catch (err) {
+      console.log({ err });
+      res.status(200).json({ error: err.message });
+    }
   }
 );
 
