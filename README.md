@@ -8,7 +8,9 @@
 5. What parameters will you use (which a computer system can also objectively and quantitatively measure for comparison purposes) so that you can get a similarity score?
 
 ## Run the program
-`node app.js` in the terminal
+Git clone the repo
+
+Run `node app.js` in the terminal
 
 Then visit: http://localhost:3000/
 
